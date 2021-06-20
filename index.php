@@ -5,21 +5,30 @@ require "MySQL.php";
 
 
 $headers = array();
-$headersQuery = $connect->query("SELECT * FROM `headers`  ORDER BY `id` ASC");
+$headersQuery = $connect->query("SELECT * FROM `headers` ORDER BY `name` ASC");
 while ($row = $headersQuery->fetch_assoc()) {
-    $header = new Header($row['name'], array());
-    $typeQuery = $connect->query("SELECT * FROM `types` WHERE `header` = \"" . $row['id'] . "\"  ORDER BY `id` ASC");
-    $types = array();
-    while ($type = $typeQuery->fetch_assoc()) {
-        $types[count($types)] = new Type($type['id'], $header, $type['name'], new Params(""));
-    }
-    $header->types = $types;
+    $header = new Header($row['name']);
     $headers[count($headers)] = $header;
+}
+$typeQuery = $connect->query("SELECT * FROM `types` ORDER BY `header` ASC");
+$types = array();
+while ($type = $typeQuery->fetch_assoc()) {
+    $header = null;
+    for ($i=0; $i < count($headers); $i++) {
+        if($type['header'] == $headers[$i]->name)
+            $header=$headers[$i];
+    }
+    if($header!=null)
+    $types[count($types)] = new Type($header, $type['name'], new Params(""));
+    else {
+        echo "Произошла ошибка";
+        exit();
+    }
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Технолайн конфигуратор</title>
@@ -30,7 +39,8 @@ while ($row = $headersQuery->fetch_assoc()) {
 <body class="bg-secondary">
 <nav class="navbar navbar-dark navbar-expand-lg bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Технолайн конфигуратор</a>
+        <a class="navbar-brand" href="https://local.api.devdem.ru/apps/teh-line-configurator/">Технолайн
+            конфигуратор</a>
     </div>
 </nav>
 <br>
@@ -42,10 +52,12 @@ while ($row = $headersQuery->fetch_assoc()) {
             <label for="type" class="form-label">Тип станка</label>
             <select id="type" name="type" class="form-select">
                 <?php
-                for ($i = 0; $i < count($headers); $i++) {
+                for ($i=0; $i < count($headers); $i++) {
                     echo "<optgroup label=\"" . $headers[$i]->name . "\"></optgroup>";
-                    for ($j = 0; $j < count($headers[$i]->types); $j++) {
-                        echo "<option value='".$headers[$i]->types[$j]->id."'>" . $headers[$i]->types[$j]->name . "</option>";
+                    for ($k=0;$k < count($types); $k++) {
+                        if($types[$k]->header->name == $headers[$i]->name) {
+                            echo "<option value='" . $k . "'>" . $types[$k]->name . "</option>";
+                        }
                     }
                 }
                 ?>
@@ -53,13 +65,11 @@ while ($row = $headersQuery->fetch_assoc()) {
         </div>
 
         <?php
-        for ($i = 0; $i < count($headers); $i++) {
-            for ($j = 0; $j < count($headers[$i]->types); $j++) {
-                echo "<div class=\"mb-3\" id=\"" . $headers[$i]->types[$j]->name . "\" style=\"display: ".($i==0 && $j==0 ? "block" : "none")."\">";
-                echo "<label for=\"customRange1\" class=\"form-label\">" . $headers[$i]->types[$j]->name . "</label>";
+            for ($i = 0; $i < count($types); $i++) {
+                echo "<div class=\"mb-3\" id=\"" . $i . "\" style=\"display: " . ($i == 0 ? "block" : "none") . "\">";
+                echo "<label for=\"customRange1\" class=\"form-label\">" . $types[$i]->name . "</label>";
                 echo "</div>";
             }
-        }
 
         ?>
         <div class="mb-3">
@@ -87,6 +97,7 @@ while ($row = $headersQuery->fetch_assoc()) {
             if (debug) console.log(e);
         }
     });
+
     function updateUI() {
         for (let i = 0; i < selectElem.options.length; i++) {
             try {
@@ -101,6 +112,7 @@ while ($row = $headersQuery->fetch_assoc()) {
             if (debug) console.log(e);
         }
     }
+
     function goSearch() {
         if (selectElem.selectedIndex === 0) {
             console.log("Nothing");
@@ -109,5 +121,8 @@ while ($row = $headersQuery->fetch_assoc()) {
         }
     }
 </script>
+
+<?php
+$connect->close(); ?>
 </body>
 </html>

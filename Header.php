@@ -7,11 +7,9 @@ require "Param.php";
 class Header
 {
     public string $name;
-    public array $types;
 
-    function __construct(string $name, array $types)
+    function __construct(string $name)
     {
         $this->name = $name;
-        $this->types = $types;
     }
 }
