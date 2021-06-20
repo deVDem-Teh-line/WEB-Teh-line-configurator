@@ -14,12 +14,12 @@ $typeQuery = $connect->query("SELECT * FROM `types` ORDER BY `header` ASC");
 $types = array();
 while ($type = $typeQuery->fetch_assoc()) {
     $header = null;
-    for ($i=0; $i < count($headers); $i++) {
-        if($type['header'] == $headers[$i]->name)
-            $header=$headers[$i];
+    for ($i = 0; $i < count($headers); $i++) {
+        if ($type['header'] == $headers[$i]->name)
+            $header = $headers[$i];
     }
-    if($header!=null)
-    $types[count($types)] = new Type($header, $type['name'], new Params(""));
+    if ($header != null)
+        $types[count($types)] = new Type($header, $type['name'], new Params(""));
     else {
         echo "Произошла ошибка";
         exit();
@@ -52,10 +52,10 @@ while ($type = $typeQuery->fetch_assoc()) {
             <label for="type" class="form-label">Тип станка</label>
             <select id="type" name="type" class="form-select">
                 <?php
-                for ($i=0; $i < count($headers); $i++) {
+                for ($i = 0; $i < count($headers); $i++) {
                     echo "<optgroup label=\"" . $headers[$i]->name . "\"></optgroup>";
-                    for ($k=0;$k < count($types); $k++) {
-                        if($types[$k]->header->name == $headers[$i]->name) {
+                    for ($k = 0; $k < count($types); $k++) {
+                        if ($types[$k]->header->name == $headers[$i]->name) {
                             echo "<option value='" . $k . "'>" . $types[$k]->name . "</option>";
                         }
                     }
@@ -65,11 +65,11 @@ while ($type = $typeQuery->fetch_assoc()) {
         </div>
 
         <?php
-            for ($i = 0; $i < count($types); $i++) {
-                echo "<div class=\"mb-3\" id=\"" . $i . "\" style=\"display: " . ($i == 0 ? "block" : "none") . "\">";
-                echo "<label for=\"customRange1\" class=\"form-label\">" . $types[$i]->name . "</label>";
-                echo "</div>";
-            }
+        for ($i = 0; $i < count($types); $i++) {
+            echo "<div class=\"mb-3\" id=\"" . $i . "\" style=\"display: " . ($i == 0 ? "block" : "none") . "\">";
+            echo "<label for=\"customRange1\" class=\"form-label\">" . $types[$i]->name . "</label>";
+            echo "</div>";
+        }
 
         ?>
         <div class="mb-3">
