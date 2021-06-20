@@ -1,63 +1,9 @@
 <?php
 
-class Header
-{
-    public string $name;
-    public array $types;
+require "Header.php";
+require "MySQL.php";
 
-    function __construct(string $name, array $types)
-    {
-        $this->name = $name;
-        $this->types = $types;
-    }
-}
 
-class Type
-{
-    public int $id;
-    public Header $header;
-    public string $name;
-    public Params $params;
-
-    function __construct(int $id, Header $header, string $name, Params $params)
-    {
-        $this->id = $id;
-        $this->name = $name;
-        $this->header = $header;
-        $this->params = $params;
-    }
-}
-
-class Params
-{
-    public array $params;
-    function __construct(string $params)
-    {
-        //$this->params = json_decode($params);
-    }
-}
-
-class Param {
-    public string $label;
-    public int $type; // 0 - checkbox, 1 - range, 2 - input
-    public float $minValue;
-    public float $maxValue;
-    public array $options;
-
-    function __construct(string $label)
-    {
-
-    }
-}
-
-$credinals = json_decode(file_get_contents("D:\Sites\credinals.json"), true);
-$connect = mysqli_connect(
-    $credinals["mySQL"]["host"],
-    $credinals["mySQL"]["account"][1]["user"],
-    $credinals["mySQL"]["account"][1]["password"],
-    "teh-line-configurator",
-    $credinals["mySQL"]["port"]);
-$connect->query("SET NAMES `utf8`");
 $headers = array();
 $headersQuery = $connect->query("SELECT * FROM `headers`  ORDER BY `id` ASC");
 while ($row = $headersQuery->fetch_assoc()) {
