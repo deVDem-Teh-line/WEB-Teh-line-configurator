@@ -33,6 +33,26 @@
                 }
             }
             header("Location: https://local.api.devdem.ru/apps/teh-line-configurator/admin.php");
+            break;
+        }
+        case "headers":
+        {
+            $headers = array();
+            $headersQuery = $connect->query("SELECT * FROM `headers` ORDER BY `name` ASC");
+            while ($row = $headersQuery->fetch_assoc()) {
+                $header = new Header($row['name']);
+                $headers[count($headers)] = $header;
+            }
+            $connect->query("TRUNCATE `teh-line-configurator`.`headers`;");
+            var_dump($_POST);
+            for ($i = 0; $i < count($_POST); $i++) {
+                if ($keys[$i] != 'action') {
+                    $sql = sprintf("INSERT INTO `headers`(`name`) VALUES ('%s');", $_POST[$keys[$i]]);
+                    $connect->query($sql);
+                }
+            }
+            header("Location: https://local.api.devdem.ru/apps/teh-line-configurator/admin.php");
+            break;
         }
     }
 
@@ -58,14 +78,32 @@
         switch ($_GET['menu']) {
             case 1:
             {
+                echo "<h1 class=\"text-primary\">Настройки списка - Заголовки</h1>
+                    <h4 class=\"text-black-50\">Измените список заголовков и нажмите кнопку \"сохранить\"</h4>
+                    <form class='form-control' method='post'>
+                    <input type='hidden' name='action' value='headers'/>";
                 $headers = array();
                 $headersQuery = $connect->query("SELECT * FROM `headers` ORDER BY `name` ASC");
                 while ($row = $headersQuery->fetch_assoc()) {
                     $header = new Header($row['name']);
                     $headers[count($headers)] = $header;
                 }
+                echo "<div id='elements'>";
+                for ($i = 0; $i < count($headers); $i++) {
+                    ?>
+                    <div class="mb-3 row" id="<?php echo $i ?>">
+                        <div class="col-sm-11">
+                            <input class="form-control" type="text" id="<?php echo $i ?>"
+                                   name="<?php echo "h" . $i ?>" value="<?php echo $headers[$i]->name; ?>">
+                        </div>
+                        <button type="button" class="btn-close col-sm-1" aria-label="Delete"
+                                onclick="deleteItem(<?php echo $i; ?>)"></button>
+                    </div>
+                    <?php
+                }
 
-
+                echo "</div><br/><button class=\"btn btn-success mb-1 form-control\" type='button' onclick='addItem()'>Добавить</button><button class=\"btn btn-primary mb-1 form-control\" type='submit'>Сохранить</button>";
+                echo "</form><br/>";
                 break;
             }
 
@@ -79,7 +117,7 @@
                 $keys = array_keys($settings);
                 for ($i = 0; $i < count($settings); $i++) {
                     ?>
-                    <div class="mb-3 row">
+                    <div id="<?php echo $i; ?>" class="mb-3 row">
                         <label class="col-sm-2 col-form-label"
                                for="<?php echo $keys[$i] ?>"><?php echo $keys[$i]; ?></label>
 
@@ -139,6 +177,40 @@
                 document.cookie = "pwd=; expires=" + cookie_date.toGMTString();
                 location.reload();
             }
+        }
+
+        function deleteItem(k) {
+            var elements = document.getElementById("elements");
+            var items = elements.getElementsByClassName("mb-3 row");
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].id == k.toString()) {
+                    items[i].remove();
+                    break;
+                }
+            }
+        }
+        let v = 0;
+        function addItem() {
+            let elements = document.getElementById("elements");
+            let div = document.createElement('div');
+            div.className = "mb-3 row";
+            div.id = (10000+parseInt(v)).toString();
+            let col = document.createElement('div');
+            col.className = "col-sm-11";
+            div.append(col);
+            let input = document.createElement('input');
+            input.className="form-control";
+            input.type="text";
+            input.id=v;
+            input.name="h"+v;
+            col.append(input);
+            let button = document.createElement('button');
+            button.type="button";
+            button.className="btn-close col-sm-1";
+            button.setAttribute('onClick', 'deleteItem('+(10000+parseInt(v)).toString()+')');
+            div.append(button);
+            elements.append(div);
+            v++;
         }
 
     </script>
